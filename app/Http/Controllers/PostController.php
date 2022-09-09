@@ -7,6 +7,7 @@ use App\Services\RemotePostsService;
 use Illuminate\Support\Facades\View;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -172,5 +173,57 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+    }
+    
+    // API ////////////////////////////////////////////////
+    public function apiTop()
+    {
+
+        $responseData = [
+            'message'   => 'ok',
+            'data'      => []
+        ];
+
+        $posts = DB::select(
+            'SELECT P.id,
+                    P.title,
+                    P.body,
+                    max( P.rating ) AS rating,
+                    P.user_id,
+                    U.name
+            FROM posts AS P
+            LEFT JOIN users AS U ON ( U.id = P.user_id )
+            GROUP BY P.user_id'
+        );
+
+        $responseData[ 'data' ] = $posts;
+
+        return response()->json( $responseData );
+        
+    }
+
+    public function apiShow( $id )
+    {
+
+        $responseData = [
+            'message'   => 'ok',
+            'data'      => []
+        ];
+
+        $post = Post::findOrFail( $id );
+
+        $user = User::findOrFail( $post->user_id );
+
+        $responseData[ 'data' ] = [
+            'id'        => $post->id,
+            'title'     => $post->title,
+            'body'      => $post->body,
+            'user'      => [
+                'name' => $user->name
+            ]
+        ];
+
+        return response()->json( $responseData );
+
     }
 }
