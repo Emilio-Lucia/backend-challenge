@@ -10,7 +10,7 @@
 
         <div id="v_app" class="v-app">
 
-            <a class="btn" href="get-posts">
+            <a class="btn" href="/post/latest">
                 Obtener posts
             </a>
 
