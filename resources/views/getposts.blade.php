@@ -11,13 +11,25 @@
         <div id="v_app" class="v-app">
 
             <div>
-                Se guardaron {{ $cont }} posts en la BD.
+                Se guardaron {{ $postCont }} posts en la BD.
             </div>
 
-            @if ( false )
+            <div>
+                Se guardaron {{ $usersCont }} usuarios en la BD.
+            </div>
+
+            @if ( ! true )
                 <ul>
                     @foreach ( $posts as $post )
                     <li>{{ var_dump( $post ) }}</li>
+                    @endforeach
+                </ul>
+            @endif
+
+            @if ( ! true )
+                <ul>
+                    @foreach ( $users as $user )
+                    <li>{{ var_dump( $user ) }}</li>
                     @endforeach
                 </ul>
             @endif

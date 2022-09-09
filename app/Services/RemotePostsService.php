@@ -39,4 +39,16 @@ class RemotePostsService {
 
         return $amount_posts;
     }
+
+    public function getUsers()
+    {
+        $response = $this->http_client->get( 'https://jsonplaceholder.typicode.com/users' );
+
+        // Simplificado para la ocasión
+        if ( $response->failed() ) return [];
+
+        $users = json_decode( $response->getBody()->getContents(), true );
+
+        return $users;
+    }
 }

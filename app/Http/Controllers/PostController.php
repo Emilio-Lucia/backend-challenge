@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\RemotePostsService;
 use Illuminate\Support\Facades\View;
 use App\Models\Post;
+use App\Models\User;
 
 class PostController extends Controller
 {
@@ -40,8 +41,10 @@ class PostController extends Controller
         $remote_posts = $rpService->getPosts( $amount );
 
 
-        $cont = 0;
+        $postCont   = 0;
+        $editors    = [];
 
+        // Guardamos los posts en BD
         foreach ( $remote_posts as $remote_post ) {
 
             $post = Post::find( $remote_post[ 'id' ] );
@@ -70,17 +73,58 @@ class PostController extends Controller
 
             }
 
+            ! in_array( $post->user_id, $editors ) && ( $editors[] = (int) $post->user_id );
+
             $success = $post->save();
 
-            $success && ( $cont++ );
+            $success && ( $postCont++ );
+
+        }
+
+
+        $usersCont      = 0;
+        $remote_users   = $rpService->getUsers();
+
+        // Guardamos los usuarios en BD
+        foreach ( $editors as $editorId ) {
+
+            $user = User::find( $editorId );
+
+            if ( ! empty( $user ) ) continue;
+
+            $editor = call_user_func( function( $editorId ) use( $remote_users ) {
+
+                foreach( $remote_users as $remote_user ) {
+
+                    if ( $remote_user[ 'id' ] == $editorId ) return $remote_user;
+
+                }
+
+                return null;
+
+            }, $editorId );
+
+            if ( empty( $editor ) ) continue;
+
+            $user = User::create( [
+                'id'        => $editor[ 'id' ],
+                'name'      => $editor[ 'name' ],
+                'email'     => $editor[ 'email' ],
+                'city'      => $editor[ 'address' ][ 'city' ]
+            ] );
+
+            $success = $user->save();
+
+            $success && ( $usersCont++ );
 
         }
 
         return View::make( 'getposts', [
-
-            // 'posts'     => $remote_posts
-            'cont'  => $cont
-
+            // 'posts'         => $remote_posts,
+            'postCont'      => $postCont,
+            // 'users'         => $rpService->getUsers(),
+            // 'editors'       => $editors,
+            'usersCont'     => $usersCont
         ] );
 
     }
