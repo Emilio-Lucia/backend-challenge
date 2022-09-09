@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PostsController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,13 @@ use Illuminate\Support\Facades\Route;
 Route::get( '/', function () {
     return view( 'home' );
 } );
+
+Route::prefix( 'post' )
+  ->name( 'post.' )
+  ->group( function() {
+
+    Route::get( '/latest/{amount?}', [ PostController::class, 'store' ] )
+        ->whereNumber( 'amount' )
+        ->name( 'latest' );
+
+  } );
